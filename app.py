@@ -120,10 +120,8 @@ def main():
             start_split = st.button("開始分割")
             if start_split:
                 st.write("\n")
-                progress_bar = st.progress(0)
+                
                 status_text = st.empty()
-
-                progress_bar.progress(0)
                 status_text.text("開始處理文件，請稍後...")
                 
                 df = read_uploaded_file(uploaded_file, header_rows=header_rows)
@@ -147,7 +145,7 @@ def main():
                     chunks, log_details = split_by_row_count(df, split_column, split_size)
 
                 total_chunks = len(chunks)
-
+                progress_bar = st.progress(0)
                 for idx, chunk in enumerate(chunks):
                     output_path = os.path.join(output_dir, f'{idx + 1}.xlsx')
                     with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
@@ -217,8 +215,6 @@ def main():
                 log_details = []
 
                 today_date = datetime.now().strftime('%Y%m%d')
-
-                progress_bar = st.progress(0)
                 status_text = st.empty()
                 
                 status_text.text("開始處理文件，請稍後...")
