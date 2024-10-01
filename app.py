@@ -120,10 +120,6 @@ def main():
             start_split = st.button("開始分割")
             if start_split:
                 st.write("\n")
-                if split_column not in df.columns:
-                    st.error(f"上傳的檔案中找不到 {split_column} 欄位，請重新確認。")
-                    return
-                    
                 progress_bar = st.progress(0)
                 status_text = st.empty()
 
@@ -134,7 +130,10 @@ def main():
                 if df is None:
                     st.error("無法讀取上傳的檔案，請確認檔案格式是否正確。")
                     return             
-
+                if split_column not in df.columns:
+                    st.error(f"上傳的檔案中找不到 {split_column} 欄位，請重新確認。")
+                    return
+                    
                 total_rows = len(df)
                 today_date = datetime.now().strftime('%Y%m%d')
                 output_dir = os.path.join('temp_output', today_date)
