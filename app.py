@@ -106,7 +106,7 @@ def main():
         with col1:
             split_logic = st.selectbox("選擇分割邏輯 (同組資料均不拆散)", ["計算不重覆ID數 (Shopee模式)", "計算表格行數 (Yahoo模式)"])
             split_column_default = "商品 ID" if split_logic == "計算不重覆ID數 (Shopee模式)" else "賣場編號"
-            split_column = st.text_input("分割依據的欄位名稱", value=split_column_default)
+            split_column = st.text_input("分割依據的欄位標題", value=split_column_default)
 
         with col2:
             header_rows = st.number_input("標題佔幾行?", min_value=0, value=1, key="split")
