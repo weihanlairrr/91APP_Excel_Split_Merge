@@ -220,7 +220,7 @@ def main():
 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
-                progress_bar.progress(0)
+                
                 status_text.text("開始處理文件，請稍後...")
 
                 header_workbook = None
