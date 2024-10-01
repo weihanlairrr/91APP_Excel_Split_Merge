@@ -120,7 +120,7 @@ def main():
             start_split = st.button("開始分割")
             if start_split:
                 st.write("\n")
-                
+                df = read_uploaded_file(uploaded_file, header_rows=header_rows)
                 if df is None:
                     st.error("無法讀取上傳的檔案，請確認檔案格式是否正確。")
                     return             
@@ -134,8 +134,6 @@ def main():
 
                 progress_bar.progress(0)
                 status_text.text("開始處理文件，請稍後...")
-
-                df = read_uploaded_file(uploaded_file, header_rows=header_rows)
 
                 total_rows = len(df)
                 today_date = datetime.now().strftime('%Y%m%d')
