@@ -120,7 +120,15 @@ def main():
             start_split = st.button("開始分割")
             if start_split:
                 st.write("\n")
-
+                
+                if df is None:
+                    st.error("無法讀取上傳的檔案，請確認檔案格式是否正確。")
+                    return             
+                    
+                if split_column not in df.columns:
+                    st.error(f"上傳的檔案中找不到 {split_column} 欄位，請重新確認。")
+                    return
+                    
                 progress_bar = st.progress(0)
                 status_text = st.empty()
 
@@ -128,18 +136,6 @@ def main():
                 status_text.text("開始處理文件，請稍後...")
 
                 df = read_uploaded_file(uploaded_file, header_rows=header_rows)
-
-                if df is None:
-                    st.error("無法讀取上傳的檔案，請確認檔案格式是否正確。")
-                    progress_bar.empty()
-                    status_text.empty()
-                    return
-
-                if split_column not in df.columns:
-                    st.error(f"上傳的檔案中找不到 {split_column} 欄位，請確認上傳的檔案正確。")
-                    progress_bar.empty()
-                    status_text.empty()
-                    return
 
                 total_rows = len(df)
                 today_date = datetime.now().strftime('%Y%m%d')
