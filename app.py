@@ -215,8 +215,9 @@ def main():
                 log_details = []
 
                 today_date = datetime.now().strftime('%Y%m%d')
+
+                progress_bar = st.progress(0)
                 status_text = st.empty()
-                
                 status_text.text("開始處理文件，請稍後...")
 
                 header_workbook = None
@@ -292,6 +293,5 @@ def main():
                     mime='application/zip',
                     on_click=reset_file_uploader
                 )
-
 if __name__ == '__main__':
     main()
