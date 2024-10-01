@@ -104,7 +104,7 @@ def main():
         col1, col2 = st.columns(2)
 
         with col1:
-            split_logic = st.selectbox("選擇分割邏輯 (同組資料均不拆散)", ["計算不重覆ID數 (蝦皮模式)", "計算表格行數 (Y購模式)"])
+            split_logic = st.selectbox("選擇分割邏輯 (同組資料均不拆散)", ["計算不重覆ID數 (蝦皮模式)", "計算表格行數 (Yahoo模式)"])
             split_column_default = "商品 ID" if split_logic == "計算不重覆ID數 (蝦皮模式)" else "賣場編號"
             split_column = st.text_input("分割依據的欄位名稱", value=split_column_default)
 
