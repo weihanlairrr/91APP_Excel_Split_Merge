@@ -1,6 +1,5 @@
 streamlit
 pandas
-openpyxl
 chardet
-shutil
-datetime
+openpyxl
+xlsxwriter
