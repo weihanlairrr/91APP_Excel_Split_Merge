@@ -89,7 +89,7 @@ def main():
     tab1, tab2 = st.tabs(["Excel分割", "Excel合併"])
 
     with tab1:
-        st.header("Excel分割工具")
+        st.header("91APP EXCEL分割工具")
 
         col1, col2 = st.columns(2)
 
@@ -183,7 +183,7 @@ def main():
                 )
 
     with tab2:
-        st.header("Excel合併工具")
+        st.header("91APP EXCEL合併工具")
 
         header_rows = st.number_input("標題佔幾行?", min_value=0, value=6, key="merge")
         uploaded_file = st.file_uploader("上傳包含 CSV 或 EXCEL 的 ZIP 檔", type=['zip'],
