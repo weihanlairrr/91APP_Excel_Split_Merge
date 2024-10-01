@@ -100,7 +100,7 @@ def main():
 
     with tab1:
         st.header("91APP EXCEL分割工具")
-
+        st.write("\n")
         col1, col2 = st.columns(2)
 
         with col1:
@@ -185,7 +185,7 @@ def main():
 
     with tab2:
         st.header("91APP EXCEL合併工具")
-
+        st.write("\n")
         header_rows = st.number_input("標題佔幾行?", min_value=0, value=6, key="merge")
         uploaded_file = st.file_uploader("上傳包含 CSV 或 EXCEL 的 ZIP 檔", type=['zip'],
                                          key='merge_file_uploader_' + str(st.session_state['merge_file_uploader_key']))
