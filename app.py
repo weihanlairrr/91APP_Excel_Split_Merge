@@ -8,6 +8,14 @@ from io import BytesIO
 import chardet
 from openpyxl import load_workbook
 
+st.markdown("""
+    <style>
+    div.block-container {
+        padding-top: 4rem;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
 def detect_encoding(file):
     raw_data = file.read(10000)
     result = chardet.detect(raw_data)
