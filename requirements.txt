@@ -1,0 +1,16 @@
+streamlit==1.37.0
+PyMuPDF
+pandas
+google-cloud-vision
+google-auth
+aiohttp
+openai
+requests
+tiktoken
+py_currency_converter
+streamlit_shadcn_ui
+streamlit_option_menu
+streamlit_extras==0.4.3
+openpyxl
+streamlit_float
+streamlit-cropperjs
