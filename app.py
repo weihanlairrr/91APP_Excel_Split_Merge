@@ -8,6 +8,8 @@ from io import BytesIO
 import chardet
 from openpyxl import load_workbook
 
+st.set_page_config(page_title='Excel分割合併工具', page_icon='📝')
+
 st.markdown("""
     <style>
     div.block-container {
