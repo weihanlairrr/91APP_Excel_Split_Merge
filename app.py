@@ -136,8 +136,9 @@ def main():
                 today_date = datetime.now().strftime('%Y%m%d')
                 output_dir = os.path.join('temp_output', today_date)
 
-                if not os.path.exists(output_dir):
-                    os.makedirs(output_dir)
+                if os.path.exists('temp_output'):
+                    shutil.rmtree('temp_output')
+                os.makedirs('temp_output')
 
                 if split_logic == "計算不重覆ID數 (Shopee模式)":
                     chunks, log_details = split_by_unique_ids(df, split_column, split_size)
@@ -194,24 +195,32 @@ def main():
             start_merge = st.button("開始合併")
             if start_merge:
                 st.write("\n")
-
+                        
                 temp_dir = "temp_dir"
-                if not os.path.exists(temp_dir):
-                    os.makedirs(temp_dir)
-
+                if os.path.exists('temp_output'):
+                    shutil.rmtree('temp_output')
+                os.makedirs('temp_output')
+        
                 with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
                     zip_ref.extractall(temp_dir)
-
+        
                 excel_files = []
                 csv_files = []
+        
+                # 收集檔案並過濾
                 for root, dirs, files in os.walk(temp_dir):
                     for file in files:
                         if file.endswith(('.xlsx', '.xls')):
                             excel_files.append(os.path.join(root, file))
                         elif file.endswith('.csv'):
                             csv_files.append(os.path.join(root, file))
+        
+                # 過濾掉不需要的隱藏檔案
+                excel_files = [f for f in excel_files if not os.path.basename(f).startswith('._')]
+                csv_files = [f for f in csv_files if not os.path.basename(f).startswith('._')]
 
                 total_files = len(excel_files) + len(csv_files)
+                
                 log_details = []
 
                 today_date = datetime.now().strftime('%Y%m%d')
@@ -285,7 +294,7 @@ def main():
                 shutil.rmtree(temp_dir)
 
                 st.success("檔案處理完成！")
-
+                
                 st.download_button(
                     label="下載合併檔案",
                     data=zip_buffer,
