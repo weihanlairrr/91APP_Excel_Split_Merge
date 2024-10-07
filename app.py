@@ -8,6 +8,8 @@ from io import BytesIO
 import chardet
 from openpyxl import load_workbook
 import tempfile
+import win32com.client
+import pythoncom
 
 st.set_page_config(page_title='Excel分割合併工具', page_icon='📝')
 
@@ -37,6 +39,49 @@ def read_uploaded_file(uploaded_file, header_rows=1):
     if df is not None:
         df = df.iloc[header_rows:]
     return df
+
+def unprotect_excel_sheet(file_path):
+    pythoncom.CoInitialize()
+    excel = win32com.client.Dispatch("Excel.Application")
+    excel.Visible = False
+    try:
+        # 嘗試打開 Excel 檔案，並解除保護
+        workbook = excel.Workbooks.Open(os.path.abspath(file_path))
+        for sheet in workbook.Sheets:
+            sheet.Unprotect()
+        # 儲存更改並關閉檔案
+        workbook.Save()
+        workbook.Close(SaveChanges=True)
+        print(f"{file_path} 解除保護成功")
+    except Exception as e:
+        print(f"處理 {file_path} 時發生錯誤: {e}")
+    finally:
+        # 確保正確關閉工作簿與 Excel 應用程式
+        excel.Quit()
+        pythoncom.CoUninitialize()
+
+def unzip_and_unprotect(zip_file_path, extract_to, progress_bar, status_text):
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
+
+    unprotected_files = []
+    files = [f for f in os.listdir(extract_to) if f.endswith('.xlsx')]
+    total_files = len(files)
+
+    for idx, file in enumerate(files):
+        file_path = os.path.join(extract_to, file)
+        print(f"正在處理: {file_path}")
+        try:
+            unprotect_excel_sheet(file_path)
+            unprotected_files.append(file_path)
+        except Exception as e:
+            print(f"在處理 {file_path} 時發生錯誤，跳過此檔案: {e}")
+
+        progress = (idx + 1) / total_files
+        progress_bar.progress(progress)
+        status_text.text(f"解除保護進度: {idx + 1} / {total_files}")
+    
+    return unprotected_files
 
 def split_by_unique_ids(df, split_column, split_size):
     unique_ids = df[split_column].unique()
@@ -198,37 +243,35 @@ def main():
                 st.write("\n")
                         
                 temp_dir = tempfile.mkdtemp()
-                
-                with zipfile.ZipFile(uploaded_file, 'r') as zip_ref:
-                    zip_ref.extractall(temp_dir)
-        
-                excel_files = []
-                csv_files = []
-        
-                for root, dirs, files in os.walk(temp_dir):
-                    for file in files:
-                        if file.endswith(('.xlsx', '.xls')):
-                            excel_files.append(os.path.join(root, file))
-                        elif file.endswith('.csv'):
-                            csv_files.append(os.path.join(root, file))
-        
-                excel_files = [f for f in excel_files if not os.path.basename(f).startswith('._')]
-                csv_files = [f for f in csv_files if not os.path.basename(f).startswith('._')]
 
-                total_files = len(excel_files) + len(csv_files)
-                
-                log_details = []
-
-                today_date = datetime.now().strftime('%Y%m%d')
-
+                # 先顯示進度條與狀態文字
                 progress_bar = st.progress(0)
                 status_text = st.empty()
-                status_text.text("開始處理文件，請稍後...")
+                status_text.text("正在解壓縮並解除工作表保護，請稍候...")
 
-                header_workbook = None
+                # 暫存 ZIP 檔案並解壓縮和解除保護
+                with tempfile.NamedTemporaryFile(delete=False) as temp_zip:
+                    temp_zip.write(uploaded_file.read())
+                    temp_zip.close()
+
+                    unprotected_files = unzip_and_unprotect(temp_zip.name, temp_dir, progress_bar, status_text)
+
+                # 取消保護完成後，重設進度條和狀態
+                progress_bar.empty()
+                status_text.empty()
+
+                # 重設進度條為 0，並開始合併
+                total_files = len(unprotected_files)
+                progress_bar = st.progress(0)
+                status_text = st.empty()
                 merged_data = pd.DataFrame()
 
-                for idx, file_path in enumerate(excel_files):
+                # 合併檔案
+                header_workbook = None
+                log_details = []
+                today_date = datetime.now().strftime('%Y%m%d')
+
+                for idx, file_path in enumerate(unprotected_files):
                     try:
                         workbook = load_workbook(file_path)
                         sheet = workbook.active
@@ -249,30 +292,14 @@ def main():
                     progress_bar.progress(progress)
                     status_text.text(f"處理進度: {idx + 1} / {total_files}")
 
-                for idx, file_path in enumerate(csv_files, start=len(excel_files)):
-                    try:
-                        with open(file_path, 'rb') as f:
-                            encoding = detect_encoding(f)
-                        data = pd.read_csv(file_path, encoding=encoding, dtype=str)
-                        merged_data = pd.concat([merged_data, data.iloc[header_rows:, :]], ignore_index=True)
-                        log_details.append(f"成功處理 CSV 檔案: {os.path.basename(file_path)}")
-                    except Exception as e:
-                        log_details.append(f"無法讀取 CSV 檔案 {os.path.basename(file_path)}，錯誤訊息: {e}")
-
-                    progress = (idx + 1) / total_files
-                    progress_bar.progress(progress)
-                    status_text.text(f"處理進度: {idx + 1} / {total_files}")
-
                 progress_bar.empty()
                 status_text.empty()
 
+                # 完成合併，提供下載
                 with st.spinner('就快完成了...'):
                     output = BytesIO()
                     if 'merged_workbook' in locals():
                         merged_workbook.save(output)
-                    if not merged_data.empty:
-                        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                            merged_data.to_excel(writer, index=False, header=False)
                     output.seek(0)
 
                     log_output = BytesIO()
@@ -295,8 +322,9 @@ def main():
                     label="下載合併檔案",
                     data=zip_buffer,
                     file_name=f'{today_date}_合併.zip',
-                    mime='application/zip',
-                    on_click=reset_file_uploader
+                    mime='application/zip'
                 )
+
+                
 if __name__ == '__main__':
     main()
