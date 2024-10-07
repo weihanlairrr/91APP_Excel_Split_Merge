@@ -8,8 +8,10 @@ from io import BytesIO
 import chardet
 from openpyxl import load_workbook
 import tempfile
-import win32com.client
-import pythoncom
+import platform
+if platform.system() == "Windows":
+    import pythoncom
+    import win32com.client
 
 st.set_page_config(page_title='Excel分割合併工具', page_icon='📝')
 
