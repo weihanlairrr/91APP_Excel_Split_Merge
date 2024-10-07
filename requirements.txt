@@ -3,4 +3,5 @@ pandas
 chardet
 openpyxl
 xlsxwriter
+platform
 pywin32; platform_system == "Windows"
